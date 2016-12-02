@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">My Books</string>
+    <string name="no_active_internet_connection">No active internet connection.</string>
 </resources>
