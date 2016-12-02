@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity   {
     private class NetworkAsyncTask extends AsyncTask<URL, Void, List<Volume>> {
         @Override
         protected void onPostExecute(List<Volume> volumes) {
-            if (volumes.size() > 0 && volumes != null)  {
+            if (volumes != null)  {
                 booksListView = (ListView) findViewById(R.id.list_books);
                 booksListView.setAdapter(new VolumeAdapter(MainActivity.this, volumes));
                 dataFragment.setData(volumes);
@@ -136,7 +136,6 @@ public class MainActivity extends AppCompatActivity   {
                 findViewById(R.id.no_results).setVisibility(View.VISIBLE);
             }
         }
-
         @Override
         protected List<Volume> doInBackground(URL... urls) {
             asyncVolume = Utils.fetchVolumeData(urls[0]);
