@@ -1,5 +1,6 @@
 package tech.linard.android.mybooks;
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -26,6 +27,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.data;
+
 public class MainActivity extends AppCompatActivity   {
     private EditText searchField;
     private ImageView searchButton;
@@ -34,12 +37,29 @@ public class MainActivity extends AppCompatActivity   {
     final String BASE_URL= "https://www.googleapis.com/books/v1/volumes?";
     final String QUERY_PARM = "q";
     private NetworkInfo networkInfo;
+    private RetainedFragment dataFragment;
+    private FragmentManager fm;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        fm = getFragmentManager();
+        dataFragment = (RetainedFragment) fm.findFragmentByTag("data");
+
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new RetainedFragment();
+            fm.beginTransaction().add(dataFragment, "data").commit();
+            // load the data from the web
+            dataFragment.setData(new ArrayList<Volume>());
+        }
 
 
         searchField = (EditText) findViewById(R.id.search_field);
@@ -72,6 +92,16 @@ public class MainActivity extends AppCompatActivity   {
         } else {
             findViewById(R.id.no_connection).setVisibility(View.GONE);
         }
+
+        fm = getFragmentManager();
+        dataFragment = (RetainedFragment) fm.findFragmentByTag("data");
+
+        if (dataFragment != null) {
+            Toast.makeText(this, "Fragmento nao nulo", Toast.LENGTH_LONG).show();
+            booksListView = (ListView) findViewById(R.id.list_books);
+            booksListView.setAdapter(new VolumeAdapter(MainActivity.this, dataFragment.getData()));
+
+        }
     }
     private void performSearch() {
         if (networkInfo != null && networkInfo.isConnected()) {
@@ -95,9 +125,16 @@ public class MainActivity extends AppCompatActivity   {
     private class NetworkAsyncTask extends AsyncTask<URL, Void, List<Volume>> {
         @Override
         protected void onPostExecute(List<Volume> volumes) {
-            booksListView = (ListView) findViewById(R.id.list_books);
-            booksListView.setAdapter(new VolumeAdapter(MainActivity.this, volumes));
-            Toast.makeText(MainActivity.this, "FIM DE TASK", Toast.LENGTH_SHORT).show();
+            if (volumes.size() > 0 && volumes != null)  {
+                booksListView = (ListView) findViewById(R.id.list_books);
+                booksListView.setAdapter(new VolumeAdapter(MainActivity.this, volumes));
+                dataFragment.setData(volumes);
+                Toast.makeText(MainActivity.this, "FIM DE TASK", Toast.LENGTH_SHORT).show();
+            } else {
+                booksListView.setAdapter(new VolumeAdapter(MainActivity.this, volumes));
+                booksListView.setEmptyView(findViewById(R.id.no_results));
+                findViewById(R.id.no_results).setVisibility(View.VISIBLE);
+            }
         }
 
         @Override

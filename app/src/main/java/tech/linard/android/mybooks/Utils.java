@@ -61,13 +61,17 @@ public final class Utils {
 
                 StringBuilder authorsBuilder = new StringBuilder();
                 String currentAuthor = "";
-                JSONArray authors = volumeInfo.getJSONArray("authors");
-                for (int x = 0; x < authors.length(); x++) {
-                    currentAuthor = authors.getString(x);
-                    authorsBuilder.append(currentAuthor);
+                JSONArray authors = volumeInfo.optJSONArray("authors");
+                if (authors != null) {
+                    for (int x = 0; x < authors.length(); x++) {
+                        currentAuthor = authors.getString(x);
+                        authorsBuilder.append(currentAuthor + ". ");
+                    }
+                    currentVolume.setmAuthors(authorsBuilder.toString());
+                    volumes.add(currentVolume);
+                } else {
+                    currentVolume.setmAuthors("Unknown author.");
                 }
-                currentVolume.setmAuthors(authorsBuilder.toString());
-                volumes.add(currentVolume);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -110,7 +114,7 @@ public final class Utils {
                 inputStream.close();
             }
         }
-      return jsonResponse;
+        return jsonResponse;
     }
 
     private static String readFromStream(InputStream inputStream) throws IOException {
