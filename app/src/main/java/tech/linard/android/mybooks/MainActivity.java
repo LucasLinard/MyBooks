@@ -57,8 +57,6 @@ public class MainActivity extends AppCompatActivity   {
                 performSearch();
             }
         });
-
-
     }
 
     @Override
